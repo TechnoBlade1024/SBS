@@ -27,8 +27,17 @@ def loginuser(request):
             traceback.print_exc()
             return HttpResponse("login failed")
         print(user)
+        last_login=None
         if(len(user)==1):
-            return render(request,'home.html')
+            for user_data in user:
+                last_login=user_data.last_login
+                user_data.last_login=datetime.datetime.now()
+                user_data.save()
+            request.session.create()
+            request.session['login_time']=str(datetime.datetime.now())
+            print(last_login)
+            context={'user':username,'prev_login':str(last_login)[:19]}
+            return render(request,'home.html',context=context)
         else:
             return HttpResponse("login failed")
     except:
